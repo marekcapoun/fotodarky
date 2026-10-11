@@ -1,2 +1,2 @@
-import { env } from 'cloudflare:workers';
-export async function GET(){ const e=env as unknown as Record<string,string>; return Response.json({iban:e.PAYMENT_IBAN||'', enabled:!!e.PAYMENT_IBAN}); }
+export const dynamic='force-dynamic';
+export async function GET(){return Response.json({enabled:!!process.env.PAYMENT_IBAN},{headers:{'Cache-Control':'no-store'}});}
