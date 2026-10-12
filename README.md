@@ -57,13 +57,28 @@ Administrace je chráněná vlastním přihlášením. Zákaznická relace z e-s
 - zákazníci: automatické seskupení původních objednávek podle e-mailu, vlastní kontakty, úprava údajů, poznámky, archivace a historie nákupů;
 - soubory: vyhledávání podle názvu a objednávky, soukromý náhled a stažení tiskových PDF, odstranění nepřiřazených návrhů po potvrzení. Soubory přiřazené k objednávce jsou chráněné před smazáním.
 
-### Nastavení přihlášení
+### Vytvoření prvního administrátora v prohlížeči
 
-1. Lokálně spusťte `npm run admin:password`. Zadejte heslo s 12 až 200 znaky (při psaní je maskované). Skript vypíše jeho `scrypt` hash.
-2. Ve Vercel Environment Variables nastavte `ADMIN_EMAIL` na přihlašovací e-mail a `ADMIN_PASSWORD_HASH` na hodnotu `scrypt$...` vypsanou skriptem, bez prefixu `ADMIN_PASSWORD_HASH=`. Heslo samotné do projektu ani repozitáře neukládejte.
-3. Ponechte `SESSION_SECRET` a `BLOB_READ_WRITE_TOKEN` dle výše uvedeného nastavení. Proveďte Redeploy a otevřete `<vaše-doména>/admin`.
+Není potřeba instalovat Node.js ani vytvářet hash hesla v příkazovém řádku.
 
-Jde o jednoho správce. Přihlášení platí osm hodin, používá HttpOnly/SameSite cookie a je ověřováno přímo na každém admin API. Odhlášení zneplatní uloženou relaci. Změna heslového hashe nebo SESSION_SECRET zneplatní staré přihlášení. Přihlášení je omezeno na deset pokusů za patnáct minut pro danou IP; administrace nepoužívá zákaznické identity hlaviček.
+1. Ponechte nastavené `SESSION_SECRET` a soukromé Blob úložiště (`BLOB_READ_WRITE_TOKEN`).
+2. Ve Vercel nastavte `ADMIN_SETUP_TOKEN` na vlastní tajný instalační kód o alespoň 16 znacích a proveďte Redeploy.
+3. Otevřete `<vaše-doména>/admin`, zvolte **Vytvořit účet**, oprávnění **Administrátor**, vyplňte jméno, e-mail, heslo (alespoň 12 znaků), jeho potvrzení a instalační kód.
+4. První správce se vytvoří a automaticky přihlásí. Poté můžete `ADMIN_SETUP_TOKEN` z Vercel odstranit. Po odstranění proveďte nové nasazení.
+
+Veřejné vytvoření administrátora se uzamkne při založení prvního účtu a neotevře se znovu deaktivací účtu. Při souběžném založení je první administrátor rezervován jedinečným záznamem v úložišti. Pokud uložení účtu selže po rezervaci, dokončete založení se stejným e-mailem a instalačním kódem.
+
+### Další uživatelé a administrátoři
+
+- V loginu může návštěvník vytvořit účet **Uživatel**; takový účet čeká na schválení a nemá přístup k objednávkám ani souborům.
+- Přihlášený administrátor v sekci **Uživatelské účty** schválí či deaktivuje účet, změní oprávnění nebo vytvoří dalšího uživatele / administrátora přímo jako aktivní účet.
+- Uživatel má provozní přístup k objednávkám, kontaktům a souborům. Jen administrátor spravuje uživatelské účty a může přidávat administrátory.
+- Změna oprávnění nebo deaktivace zneplatní dosavadní přihlášení daného účtu. Správce si nemůže odebrat vlastní administrátorský přístup.
+- Hesla se automaticky ukládají jako osolené scrypt hashe. API seznamu účtů heslové hashe nevrací.
+
+Původní přihlášení pomocí `ADMIN_EMAIL` a `ADMIN_PASSWORD_HASH` je stále podporované, pokud tyto proměnné už používáte. Původní správce se přihlásí a založí nové účty v sekci Uživatelské účty. Samostatně vytvářený hash už není potřeba pro nové účty; skript `npm run admin:password` zůstává pro starý způsob nastavení.
+
+Přihlášení platí osm hodin, používá HttpOnly/SameSite cookie a je ověřováno přímo na každém admin API. Odhlášení zneplatní uloženou relaci. Změna SESSION_SECRET zneplatní staré přihlášení. Přihlášení a registrace jsou omezené na deset pokusů za patnáct minut pro danou IP. Uživatelské účty se ukládají pod `admin/users/`, rezervace prvního správce pod `admin/bootstrap.json`.
 
 Administrace automaticky načte i objednávky, které už jsou ve stávajícím Vercel Blob store. Data z původního Sites úložiště tím nejsou migrována.
 
