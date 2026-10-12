@@ -48,3 +48,27 @@ PDF: 300 DPI, RGB, raster s JPEG kompresí, TrimBox a BleedBox. Kalendář, magn
 ## Doména
 
 Po nasazení přidejte vlastní doménu v **Settings → Domains** a nastavte DNS podle údajů Vercel. Tato příprava doménu nepřipojuje ani nezakládá Vercel projekt.
+
+## Administrace `/admin`
+
+Administrace je chráněná vlastním přihlášením. Zákaznická relace z e-shopu k ní přístup nedává. Správce má přehled:
+
+- objednávky: hledání, filtrování, detail položek, stavy Přijato / Ve výrobě / Připraveno / Odesláno / Dokončeno / Zrušeno, ruční potvrzení platby a interní poznámky;
+- zákazníci: automatické seskupení původních objednávek podle e-mailu, vlastní kontakty, úprava údajů, poznámky, archivace a historie nákupů;
+- soubory: vyhledávání podle názvu a objednávky, soukromý náhled a stažení tiskových PDF, odstranění nepřiřazených návrhů po potvrzení. Soubory přiřazené k objednávce jsou chráněné před smazáním.
+
+### Nastavení přihlášení
+
+1. Lokálně spusťte `npm run admin:password`. Zadejte heslo s 12 až 200 znaky (při psaní je maskované). Skript vypíše jeho `scrypt` hash.
+2. Ve Vercel Environment Variables nastavte `ADMIN_EMAIL` na přihlašovací e-mail a `ADMIN_PASSWORD_HASH` na hodnotu `scrypt$...` vypsanou skriptem, bez prefixu `ADMIN_PASSWORD_HASH=`. Heslo samotné do projektu ani repozitáře neukládejte.
+3. Ponechte `SESSION_SECRET` a `BLOB_READ_WRITE_TOKEN` dle výše uvedeného nastavení. Proveďte Redeploy a otevřete `<vaše-doména>/admin`.
+
+Jde o jednoho správce. Přihlášení platí osm hodin, používá HttpOnly/SameSite cookie a je ověřováno přímo na každém admin API. Odhlášení zneplatní uloženou relaci. Změna heslového hashe nebo SESSION_SECRET zneplatní staré přihlášení. Přihlášení je omezeno na deset pokusů za patnáct minut pro danou IP; administrace nepoužívá zákaznické identity hlaviček.
+
+Administrace automaticky načte i objednávky, které už jsou ve stávajícím Vercel Blob store. Data z původního Sites úložiště tím nejsou migrována.
+
+Změny stavu a plateb jsou oddělené od původního objednávkového JSON; administrace nemění částky ani odeslané objednávkové údaje. Kontakt lze upravit, ale původní kontaktní snímek v objednávce se nepřepisuje. Při souběžném uložení se kontroluje ETag a aplikace odmítne přepsat novější změnu jiného otevřeného okna. Platební stav nastavuje správce, není připojené bankovní párování.
+
+Interní záznamy se ukládají pod `admin/orders/`, `admin/customers/`, `admin/sessions/` a `admin/login-attempts/` v soukromém Blob store. API neposkytuje zákazníkům přímé adresy tiskových souborů. Administrace streamuje PDF přes chráněnou cestu `/api/admin/files`.
+
+Ověření: `npm test` spouští funkční testy admin modulů nad paměťovým adaptérem Blob (přihlášení, ochrana API, stav a platba, kontakty, soubory, konfliktní zápis, odhlášení). `npm run build` kontroluje TypeScript a produkční sestavení. Testy nezapisují do skutečného Vercel úložiště.
