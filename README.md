@@ -8,7 +8,7 @@ Projekt je připraven pro **Vercel / Next.js**, bez závislosti na Cloudflare Wo
 
 1. Na Vercel importujte repozitář `marekcapoun/fotodarky` a větev `main`.
 2. Framework **Next.js**, Root Directory ponechte prázdný; Node.js **22.x**. Build a instalaci určuje `vercel.json`.
-3. V **Storage** vytvořte Blob store s přístupem **Private** a připojte ho k projektu. Vercel doplní `BLOB_READ_WRITE_TOKEN`. Veřejný Blob store nepoužívejte pro tisková data.
+3. V **Storage** vytvořte Blob store s přístupem **Private** a připojte ho k projektu. Vercel doplní `BLOB_STORE_ID` a `BLOB_WEBHOOK_PUBLIC_KEY` a runtime používá krátkodobé OIDC ověření. Starší propojení s `BLOB_READ_WRITE_TOKEN` je stále podporované. Veřejný Blob store nepoužívejte pro tisková data.
 4. V Environment Variables nastavte `SESSION_SECRET` (nejméně 32 náhodných znaků, například výsledek `openssl rand -hex 32`). Nastavte ho pro všechna prostředí, která chcete použít.
 5. Volitelně nastavte `PAYMENT_IBAN` na správný účet příjemce. Bez účtu aplikace uloží objednávku, ale QR platba zůstane vypnutá.
 6. Proveďte Deploy / Redeploy. Při změně proměnných je potřeba nové nasazení. Soukromé testování můžete zachovat pomocí Vercel Deployment Protection.
@@ -61,7 +61,7 @@ Administrace je chráněná vlastním přihlášením. Zákaznická relace z e-s
 
 Není potřeba instalovat Node.js ani vytvářet hash hesla v příkazovém řádku.
 
-1. Ponechte nastavené `SESSION_SECRET` a soukromé Blob úložiště (`BLOB_READ_WRITE_TOKEN`).
+1. Ponechte nastavené `SESSION_SECRET` a připojené soukromé Blob úložiště (`BLOB_STORE_ID` a `BLOB_WEBHOOK_PUBLIC_KEY`; u staršího propojení `BLOB_READ_WRITE_TOKEN`).
 2. Ve Vercel nastavte `ADMIN_SETUP_TOKEN` na vlastní tajný instalační kód o alespoň 16 znacích a proveďte Redeploy.
 3. Otevřete `<vaše-doména>/admin`, zvolte **Vytvořit účet**, oprávnění **Administrátor**, vyplňte jméno, e-mail, heslo (alespoň 12 znaků), jeho potvrzení a instalační kód.
 4. První správce se vytvoří a automaticky přihlásí. Poté můžete `ADMIN_SETUP_TOKEN` z Vercel odstranit. Po odstranění proveďte nové nasazení.
@@ -87,3 +87,5 @@ Změny stavu a plateb jsou oddělené od původního objednávkového JSON; admi
 Interní záznamy se ukládají pod `admin/orders/`, `admin/customers/`, `admin/sessions/` a `admin/login-attempts/` v soukromém Blob store. API neposkytuje zákazníkům přímé adresy tiskových souborů. Administrace streamuje PDF přes chráněnou cestu `/api/admin/files`.
 
 Ověření: `npm test` spouští funkční testy admin modulů nad paměťovým adaptérem Blob (přihlášení, ochrana API, stav a platba, kontakty, soubory, konfliktní zápis, odhlášení). `npm run build` kontroluje TypeScript a produkční sestavení. Testy nezapisují do skutečného Vercel úložiště.
+
+Nahrání PDF používá presigned URL (`uploadPresigned` / `handleUploadPresigned`) a omezený krátkodobý podpis pouze pro konkrétní tiskový soubor. Tato cesta funguje s OIDC i se starším read-write tokenem. Nastavení SECRET a propojení úložiště ověříte bez zobrazení jejich hodnot na `/api/admin/configuration`.

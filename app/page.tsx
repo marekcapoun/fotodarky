@@ -7,7 +7,7 @@ import {draw,quality,printTiles} from './render-product';
 import {cartStore} from './cart-store';
 import {PDFDocument} from 'pdf-lib';
 import QRCode from 'qrcode';
-import {upload as uploadPrint} from '@vercel/blob/client';
+import {uploadPresigned as uploadPrint} from '@vercel/blob/client';
 type SavedPhoto=Omit<Photo,'image'>;
 type CartItem={id:string;config:DesignConfig;quantity:number;preview:string;photos:(SavedPhoto|undefined)[];lowAccepted:boolean};
 type Receipt={id:string;number:string;total:number;iban:string;items:{productName:string;quantity:number;total:number}[]};

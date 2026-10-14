@@ -1,4 +1,5 @@
 import {get,put,BlobNotFoundError} from '@vercel/blob';
+export function storageConfigured(){return !!process.env.BLOB_READ_WRITE_TOKEN||!!process.env.BLOB_STORE_ID;}
 export async function readJSON<T=any>(key:string):Promise<T|null>{try{const value=await get(key,{access:'private',useCache:false});if(!value||value.statusCode!==200)return null;return await new Response(value.stream).json() as T;}catch(error){if(error instanceof BlobNotFoundError)return null;throw error;}}
 export async function writeJSON(key:string,data:unknown){return put(key,JSON.stringify(data),{access:'private',addRandomSuffix:false,allowOverwrite:false,contentType:'application/json'});}
 export function bucket(owner:string){const prefix=`data/${owner}/`;return{async get(key:string){const json=await readJSON(prefix+key);return json?{async json<T>(){return json as T}}:null;},async put(key:string,data:string){return writeJSON(prefix+key,JSON.parse(data));}};}

@@ -1,12 +1,12 @@
 import {createHmac,createHash,randomUUID,randomBytes,scrypt,timingSafeEqual} from 'node:crypto';
 import {promisify} from 'node:util';
 import {list,del} from '@vercel/blob';
-import {readJSON,writeJSON} from './storage';
+import {readJSON,writeJSON,storageConfigured} from './storage';
 import {sameOrigin} from './session';
 const derive=promisify(scrypt),COOKIE='fotodarky_admin',LIFETIME=8*60*60;
 export type AdminUser={id:string;name:string;email:string;role:'admin'|'staff';status:'active'|'pending'|'disabled';passwordHash:string;version:string;createdAt:string};
 export const userId=(email:string)=>createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
-export function adminConfigured(){return (process.env.SESSION_SECRET?.length||0)>=32&&!!process.env.BLOB_READ_WRITE_TOKEN;}
+export function adminConfigured(){return (process.env.SESSION_SECRET?.length||0)>=32&&storageConfigured();}
 export function legacyConfigured(){return !!process.env.ADMIN_EMAIL&&/^scrypt\$[a-f0-9]{32}\$[a-f0-9]{128}$/.test(process.env.ADMIN_PASSWORD_HASH||'');}
 export async function findUser(email:string):Promise<AdminUser|null>{const normal=email.trim().toLowerCase();const record=await readJSON<AdminUser>(`admin/users/${userId(normal)}.json`);if(record)return record;if(legacyConfigured()&&normal===process.env.ADMIN_EMAIL!.trim().toLowerCase())return{id:'legacy',name:'Správce',email:normal,role:'admin',status:'active',passwordHash:process.env.ADMIN_PASSWORD_HASH!,version:createHash('sha256').update(process.env.ADMIN_PASSWORD_HASH!).digest('hex'),createdAt:''};return null;}
 export async function setupAvailable(){if(!adminConfigured()||legacyConfigured())return false;const marker=await readJSON<{email:string}>('admin/bootstrap.json');if(marker)return !await findUser(marker.email);let cursor:string|undefined;do{const page=await list({prefix:'admin/users/',cursor,limit:1000});for(const file of page.blobs){const user=await readJSON<AdminUser>(file.pathname);if(user?.role==='admin')return false;}cursor=page.hasMore?page.cursor:undefined;}while(cursor);return true;}
