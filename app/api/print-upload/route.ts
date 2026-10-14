@@ -1,3 +1,4 @@
+import {MAX_PRINT_BYTES} from '../../../lib/print-limits';
 import {handleUpload,handleUploadPresigned,type HandleUploadBody,type HandleUploadPresignedBody} from '@vercel/blob/client';
 import {issueSignedToken} from '@vercel/blob';
 import {ownerOf,sameOrigin} from '../../../lib/session';
@@ -28,7 +29,7 @@ export async function POST(req:Request) {
         try{await writeJSON(key,{owner,id,config:data.config,lowQualityAccepted:data.lowQualityAccepted,createdAt:new Date().toISOString()});}
         catch(error){if(!matches(await readJSON(key)))throw error;}
       }
-      return {allowedContentTypes:['application/pdf'],maximumSizeInBytes:30*1024*1024,addRandomSuffix:false,allowOverwrite:false,validUntil:Date.now()+10*60*1000};
+      return {allowedContentTypes:['application/pdf'],maximumSizeInBytes:MAX_PRINT_BYTES,addRandomSuffix:false,allowOverwrite:false,validUntil:Date.now()+10*60*1000};
     };
     // /api/designs validates the completed PDF. No webhook is needed.
     const result=mode==='token'
