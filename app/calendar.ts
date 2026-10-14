@@ -3,8 +3,8 @@ export type Photo={src:string;image:HTMLImageElement;zoom:number;x:number;y:numb
 export type Config={format:string;style:string;year:number;title:string};
 export const size=(format:string)=>format==='A3'?[297,420]:[210,297];
 export function quality(p:Photo,c:Config){const [w,h]=size(c.format), iw=p.rotation%180?p.image.naturalHeight:p.image.naturalWidth, ih=p.rotation%180?p.image.naturalWidth:p.image.naturalHeight;const scale=Math.max((w-24)/iw,(h*.54)/ih)*p.zoom;return Math.floor(25.4/scale);}
-export function draw(canvas:HTMLCanvasElement,index:number,p:Photo|undefined,c:Config,width=600,bleed=false){
- const [mmw,mmh]=size(c.format),b=bleed?3:0,W=mmw+2*b,H=mmh+2*b;canvas.width=width;canvas.height=Math.round(width*H/W);const ctx=canvas.getContext('2d')!;ctx.scale(width/W,width/W);ctx.fillStyle=c.style==='warm'?'#faf5ed':c.style==='dark'?'#1d3430':'#ffffff';ctx.fillRect(0,0,W,H);ctx.translate(b,b);
+export function draw(canvas:HTMLCanvasElement,index:number,p:Photo|undefined,c:Config,width=600,bleed=false,tile?:{x:number;y:number;width:number;height:number}){
+ const [mmw,mmh]=size(c.format),b=bleed?3:0,W=mmw+2*b,H=mmh+2*b;canvas.width=tile?.width||width;canvas.height=tile?.height||Math.round(width*H/W);const ctx=canvas.getContext('2d')!;if(tile)ctx.translate(-tile.x,-tile.y);ctx.scale(width/W,width/W);ctx.fillStyle=c.style==='warm'?'#faf5ed':c.style==='dark'?'#1d3430':'#ffffff';ctx.fillRect(0,0,W,H);ctx.translate(b,b);
  const ink=c.style==='dark'?'#f5f1e7':'#203c35',accent=c.style==='warm'?'#b86946':'#4d8068';const x=12,y=16,pw=mmw-24,ph=mmh*.54;
  ctx.save();ctx.beginPath();ctx.rect(x,y,pw,ph);ctx.clip();
  if(p){const iw=p.rotation%180?p.image.naturalHeight:p.image.naturalWidth,ih=p.rotation%180?p.image.naturalWidth:p.image.naturalHeight;const scale=Math.max(pw/iw,ph/ih)*p.zoom;const dw=iw*scale,dh=ih*scale;ctx.translate(x+pw/2+(pw-dw)/2*p.x,y+ph/2+(ph-dh)/2*p.y);ctx.rotate(p.rotation*Math.PI/180);ctx.filter=`brightness(${p.brightness}%) ${p.gray?'grayscale(1)':''}`;ctx.drawImage(p.image,-p.image.naturalWidth*scale/2,-p.image.naturalHeight*scale/2,p.image.naturalWidth*scale,p.image.naturalHeight*scale);

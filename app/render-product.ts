@@ -2,7 +2,7 @@ import {draw as drawCalendar,quality as calendarQuality,Photo} from './calendar'
 import {DesignConfig,getProduct,getVariant} from './catalog';
 export function quality(photo:Photo,c:DesignConfig){if(c.product==='calendar')return calendarQuality(photo,{format:c.variant,...c});const v=getVariant(c.product,c.variant)!,b=getProduct(c.product)!.bleed;const pad=c.style==='warm'?Math.min(v.w,v.h)*.06:0;const w=v.w+2*b-2*pad,h=v.h+2*b-2*pad-(c.style==='dark'?v.h*.12:0),iw=photo.rotation%180?photo.image.naturalHeight:photo.image.naturalWidth,ih=photo.rotation%180?photo.image.naturalWidth:photo.image.naturalHeight;return Math.floor(25.4/(Math.max(w/iw,h/ih)*photo.zoom));}
 export function draw(canvas:HTMLCanvasElement,i:number,p:Photo|undefined,c:DesignConfig,width=600,bleed=false,tile?:{x:number;y:number;width:number;height:number}){
- if(c.product==='calendar'){drawCalendar(canvas,i,p,{format:c.variant,...c},width,bleed);return;}
+ if(c.product==='calendar'){drawCalendar(canvas,i,p,{format:c.variant,...c},width,bleed,tile);return;}
  const v=getVariant(c.product,c.variant)!,b=getProduct(c.product)!.bleed,W=v.w+2*b,H=v.h+2*b;
  // One common print surface: preview crops the exact trim area from the full bleed artwork.
  const zoom=width/(bleed?W:v.w);canvas.width=tile?.width||width;canvas.height=tile?.height||Math.round(width*(bleed?H/W:v.h/v.w));const ctx=canvas.getContext('2d')!;if(tile)ctx.translate(-tile.x,-tile.y);ctx.scale(zoom,zoom);if(!bleed)ctx.translate(-b,-b);
