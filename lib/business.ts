@@ -1,0 +1,1 @@
+export const business={name:'Marek Čapoun',street:'Nádražní 498/48',city:'Miroslav',postalCode:'671 72',address:'Nádražní 498/48, 671 72 Miroslav',ico:'76125335',dic:'CZ8907115151',email:'objednavky@fotodarky.online',phone:'+420 724 317 100',phoneLink:'+420724317100',account:'7612533598/5500',iban:'CZ2955000000007612533598'} as const;

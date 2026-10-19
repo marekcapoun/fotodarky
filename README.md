@@ -91,3 +91,9 @@ Interní záznamy se ukládají pod `admin/orders/`, `admin/customers/`, `admin/
 Ověření: `npm test` spouští funkční testy admin modulů nad paměťovým adaptérem Blob (přihlášení, ochrana API, stav a platba, kontakty, soubory, konfliktní zápis, odhlášení). `npm run build` kontroluje TypeScript a produkční sestavení. Testy nezapisují do skutečného Vercel úložiště.
 
 Nahrání PDF používá presigned URL (`uploadPresigned` / `handleUploadPresigned`) a omezený krátkodobý podpis pouze pro konkrétní tiskový soubor. Tato cesta funguje s OIDC i se starším read-write tokenem. Nastavení SECRET a propojení úložiště ověříte bez zobrazení jejich hodnot na `/api/admin/configuration`.
+
+## Kontakty a obchodní podmínky
+
+Kontakty `/kontakt` čerpají z `lib/business.ts`. Podmínky `/obchodni-podminky` a jejich textová verze používají `lib/legal.ts`. Nová objednávka ukládá neměnný snímek znění a verze podmínek; potvrzovací e-mail přikládá toto uložené znění jako UTF-8 TXT vedle QR PNG. Při změně podmínek zvyšte `termsVersion` a datum. Starší objednávky se nepřepisují. Údaje provozovatele byly ověřeny v ARES podle IČO 76125335.
+
+`public/legal-guarantee-cs.svg` je nezměněné české barevné harmonizované oznámení Evropské komise z oficiálního balíčku SVG (https://commission.europa.eu/document/download/27c45f1f-78a1-47a7-a7cc-adf23afee5ea_en?filename=SVG.zip). Oznámení se zobrazuje před objednáním a u obchodních podmínek. Právní informace ověřeny 19. 10. 2026 podle ČOI (odstoupení, reklamace, ADR) a Evropské komise (oznámení účinné od 27. 9. 2026).

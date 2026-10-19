@@ -1,7 +1,7 @@
 export type Address={firstName:string;lastName:string;street:string;city:string;postalCode:string;country:'CZ';company:string;ico:string;dic:string};
 export type CheckoutDetails={billing:Address;email:string;phone:string;differentDelivery:boolean;delivery:Address|null;shippingId:string;note:string;consent:boolean};
 export const emptyAddress=():Address=>({firstName:'',lastName:'',street:'',city:'',postalCode:'',country:'CZ',company:'',ico:'',dic:''});
-export const shippingMethods=[{id:'pickup',name:'Osobní odběr',description:'Místo a termín odběru s vámi potvrdíme.',price:0},{id:'courier',name:'Kurýr na adresu',description:'Doručení na uvedenou adresu v České republice.',price:129}] as const;
+export const shippingMethods=[{id:'pickup',name:'Osobní odběr',description:'Nádražní 498/48, Miroslav. Termín po domluvě.',price:0},{id:'courier',name:'Kurýr na adresu',description:'Doručení na uvedenou adresu v České republice.',price:129}] as const;
 export function shippingMethod(id:string){return shippingMethods.find(m=>m.id===id);}
 const text=(v:unknown,max:number,required=false):v is string=>typeof v==='string'&&v.length<=max&&(!required||!!v.trim());
 export function validAddress(v:unknown):v is Address{if(!v||typeof v!=='object')return false;const a=v as Address;return text(a.firstName,60,true)&&text(a.lastName,60,true)&&text(a.street,150,true)&&text(a.city,100,true)&&typeof a.postalCode==='string'&&/^\d{3}\s?\d{2}$/.test(a.postalCode.trim())&&a.country==='CZ'&&text(a.company,150)&&text(a.ico,8)&&(!a.ico||/^\d{8}$/.test(a.ico))&&text(a.dic,20)&&(!a.dic||/^[A-Z]{2}[A-Z0-9]{8,12}$/.test(a.dic))&&(!a.company||!!a.ico);}
