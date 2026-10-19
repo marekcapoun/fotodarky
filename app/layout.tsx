@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "fotodárky.online · Z fotek radost",
-  description: "Vytvořte osobní kalendáře, obrazy, magnetky a plakáty. Jeden editor, spousta radosti.",
+  description: "Vytvořte osobní kalendáře, obrazy, magnetky, plakáty, hrnky, puzzle a pexeso. Jeden editor, spousta radosti.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

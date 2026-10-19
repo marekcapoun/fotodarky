@@ -4,7 +4,7 @@ import {issueSignedToken} from '@vercel/blob';
 import {ownerOf,sameOrigin} from '../../../lib/session';
 import {readJSON,writeJSON} from '../../../lib/storage';
 import {uploadMode} from '../../../lib/upload-mode';
-import {validConfig} from '../../catalog';
+import {validConfig,canOrder} from '../../catalog';
 export const runtime='nodejs';
 export const maxDuration=60;
 export async function POST(req:Request) {
@@ -21,6 +21,7 @@ export async function POST(req:Request) {
       if(!pathname.startsWith(prefix)||!pathname.endsWith('.pdf')||!/^[a-f0-9-]{36}$/.test(id))throw new Error('Neplatný cíl nahrání.');
       const data=JSON.parse(payload||'null');
       if(!data||!validConfig(data.config)||typeof data.lowQualityAccepted!=='boolean')throw new Error('Neplatný návrh.');
+      if(!canOrder(data.config))throw new Error('Tento produkt zatím nemá potvrzenou cenu nebo tiskovou šablonu.');
       const key=`data/${owner}/intents/${id}.json`;
       const matches=(saved:any)=>saved?.owner===owner&&JSON.stringify(saved.config)===JSON.stringify(data.config)&&saved.lowQualityAccepted===data.lowQualityAccepted;
       const saved=await readJSON(key);
