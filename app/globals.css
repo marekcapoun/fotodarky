@@ -60,3 +60,7 @@
 @media(max-width:760px){.logo.brand-logo{font-size:22px;letter-spacing:-1px}.logo.brand-logo .logo-icon{width:33px;height:33px;border-radius:11px;margin-right:8px}.site-footer .logo.brand-logo{font-size:20px}.storefront .info-header{min-height:90px}.storefront .info-header nav{font-size:12px;gap:14px 20px}.customer-header{align-items:center;flex-wrap:wrap;gap:16px}.customer-header .textbutton{font-size:12px}}
 @media(max-width:420px){.logo.brand-logo{font-size:20px}.logo.brand-logo .logo-icon{width:30px;height:30px}.header-actions{gap:8px}.customer-account-link{font-size:10px}.storefront .header{padding-left:14px;padding-right:14px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* The generic storefront main must not remove the account page spacing. */
+.storefront .customer-page{max-width:none;width:100%;padding:30px 24px 70px;min-height:100vh}
+@media(max-width:760px){.storefront .customer-page{padding:20px 14px 40px}}
