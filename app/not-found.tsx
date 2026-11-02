@@ -1,0 +1,2 @@
+import InfoShell from './info-shell';
+export default function NotFound(){return <InfoShell><main className="info-main"><section className="info-hero"><div className="eyebrow">STRÁNKA NENALEZENA · 404</div><h1>Tady se vzpomínka<br/><span>zatoulala.</span></h1><p>Tato stránka neexistuje nebo se přesunula. Vyberte si svůj fotodárek, nebo nám napište a pomůžeme vám.</p><a className="primary" href="/#produkty">Vybrat fotodárek</a></section></main></InfoShell>}
