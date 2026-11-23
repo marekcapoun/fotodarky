@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import ts from 'typescript';
+const url=path=>'data:text/javascript;base64,'+Buffer.from(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64');
+const transfer=await import(url('lib/photo-transfer.ts'));
+process.env.SESSION_SECRET='photo-transfer-test-secret-with-at-least-32-characters';
+const owner=crypto.randomUUID(),pair=transfer.issueTransfer(owner),parsed=transfer.verifyTransfer(pair.token);assert.equal(parsed.owner,owner);assert.equal(parsed.id,pair.id);assert.ok(parsed.expires>Date.now());assert.ok(parsed.expires<=Date.now()+15*60*1000);assert.equal(transfer.transferPrefix(parsed),`transfer/${owner}/${pair.id}/`);
+assert.equal(transfer.verifyTransfer(pair.token+'x'),null);assert.equal(transfer.verifyTransfer('bad'),null);assert.equal(transfer.verifyTransfer('x'.repeat(2000)),null);const [payload,sig]=pair.token.split('.');assert.equal(transfer.verifyTransfer(Buffer.from(JSON.stringify({...parsed,owner:crypto.randomUUID()})).toString('base64url')+'.'+sig),null);
+const now=Date.now;Date.now=()=>parsed.expires+1;assert.equal(transfer.verifyTransfer(pair.token),null);assert.deepEqual(transfer.verifyTransfer(pair.token,true),parsed);Date.now=now;
+const old=process.env.SESSION_SECRET;process.env.SESSION_SECRET='different-secret-with-at-least-32-characters';assert.equal(transfer.verifyTransfer(pair.token),null);process.env.SESSION_SECRET=old;
+console.log('PASS: QR transfer capability scope, signature, owner/pair binding, tamper/oversize rejection, 15-minute expiry and session-secret rotation');

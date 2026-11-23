@@ -1,0 +1,8 @@
+import type {DesignConfig} from './catalog';
+import type {Photo} from './calendar';
+export type SavedPhoto=Omit<Photo,'image'>;
+export type EditorProject={id:string;version:2;config:DesignConfig;photos:(SavedPhoto|null)[];updatedAt:string;step:number;active:number};
+export function savedPhotos(photos:(Photo|undefined)[]){return photos.map(p=>p?{src:p.src,zoom:p.zoom,x:p.x,y:p.y,rotation:p.rotation,brightness:p.brightness,gray:p.gray,name:p.name}:null);}
+export async function restorePhotos(photos:(SavedPhoto|null|undefined)[]){return Promise.all(photos.map(async p=>{if(!p)return undefined;const image=new Image();image.src=p.src;await image.decode();return{...p,image};}));}
+// A separate database keeps projects independent from existing cart data.
+export async function projectStore(action:'list'|'put'|'delete',value?:EditorProject|string):Promise<EditorProject[]>{return new Promise((resolve,reject)=>{const request=indexedDB.open('fotodarky-projects-v2',1);request.onupgradeneeded=()=>request.result.createObjectStore('projects',{keyPath:'id'});request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,tx=db.transaction('projects',action==='list'?'readonly':'readwrite'),store=tx.objectStore('projects');if(action==='put')store.put(value);if(action==='delete')store.delete(value as string);const all=store.getAll();let rows:EditorProject[]=[];all.onsuccess=()=>rows=all.result;tx.oncomplete=()=>{db.close();resolve(rows.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)))};tx.onerror=()=>{db.close();reject(tx.error)};tx.onabort=()=>{db.close();reject(tx.error)};};});}
